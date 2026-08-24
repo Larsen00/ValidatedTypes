@@ -19,6 +19,7 @@
     <Compile Include="..\ValidatedTypes.Runtime\ValidatedTypes.Runtime.fs" />
     <Compile Include="..\ValidatedTypes.Runtime\Types\Number.fs" />
     <Compile Include="..\ValidatedTypes.Runtime\Types\Integer.fs" />
+    <Compile Include="..\ValidatedTypes.Runtime\Types\List.fs" />
     <Compile Include="..\ValidatedTypes.Runtime\Types\String.fs" />
     <Compile Include="ValidatedTypes.DesignTime.fs" />
     <None Include="paket.references" />
@@ -36,6 +37,17 @@
       <ExcludeAssets>runtime;contentFiles</ExcludeAssets>
     </PackageReference>
     <PackageReference Include="JsonSchemaProvider" Version="0.1.2" />
+    <!-- JsonSchemaProvider 0.1.2's isolated type-provider design-time host
+         (typeproviders/fsharp41) was built against older versions of these
+         transitive dependencies than its nuspec declares. Without pinning
+         them, NuGet resolves the nuspec-declared (newer) versions into our
+         bin output, which the design-time host then refuses to load
+         (assembly manifest mismatch). -->
+    <PackageReference Include="NJsonSchema" Version="11.0.2" />
+    <PackageReference Include="FSharp.Data.Json.Core" Version="6.4.0" />
   </ItemGroup>
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
+  </PropertyGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

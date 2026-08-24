@@ -84,6 +84,16 @@ type BasicErasingProvider (config : TypeProviderConfig) as this =
     let createString : string -> string -> Assembly -> string -> ProvidedTypeDefinition =
         createType<string, _> String.parse stringCreateMethod
 
+    // Create List
+    // Items are erased to obj: the validations here (minItems/maxItems/uniqueItems) are
+    // purely structural and never inspect item content, so there is no concrete element
+    // type to fix statically the way Number/Integer/String fix their single value type.
+    let listCreateMethod =
+        methodInfoOf2 <@ fun (value: obj list) (validationsJson: string) -> List.create value validationsJson @>
+
+    let createList : string -> string -> Assembly -> string -> ProvidedTypeDefinition =
+        createType<obj list, _> List.parse listCreateMethod
+
 
     do
         // Define the provided type "Number"
@@ -124,4 +134,15 @@ type BasicErasingProvider (config : TypeProviderConfig) as this =
             fun typeName args -> createString (args.[0] :?> string) typeName thisAssembly namespaceName)
 
         this.AddNamespace(namespaceName, [StringType])
+
+        // Define the provided type "List"
+        let ListType = ProvidedTypeDefinition(thisAssembly, namespaceName, "List", Some typeof<obj>)
+
+        ListType.DefineStaticParameters(
+            [
+                ProvidedStaticParameter("Json", typeof<string>)
+            ],
+            fun typeName args -> createList (args.[0] :?> string) typeName thisAssembly namespaceName)
+
+        this.AddNamespace(namespaceName, [ListType])
 

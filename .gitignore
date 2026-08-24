@@ -417,3 +417,6 @@ $RECYCLE.BIN/
 *~
 .directory
 .Trash-*
+
+# Personal scratch notes (not part of the project deliverable)
+/notes/

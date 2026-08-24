@@ -38,11 +38,14 @@ module List =
         | Some max -> Error (sprintf "List has %d items, which is greater than the maximum allowed %d" (List.length list) max)
 
     // Validate uniqueItems
+    // Uses equality rather than comparison: erased list items arrive as plain 'obj',
+    // which never satisfies F#'s 'comparison' constraint (needed by Set/sort), but does
+    // satisfy 'equality' - and boxed values still dispatch to their real Equals override.
     let uniqueItems (validations: ListValidations) (list: list<'T>) =
         match validations.uniqueItems with
         | Some false
         | None -> Ok list
-        | Some true when List.length list = (Set.ofList list |> Set.count) -> Ok list
+        | Some true when List.length list = (List.distinct list |> List.length) -> Ok list
         | Some true -> Error "List contains duplicate items, but uniqueItems is set to true"
 
     // Parse input JSON string into ListValidations
