@@ -135,6 +135,50 @@ let ``integer range: value above upper bound fails`` () =
     | Error _ -> Assert.Pass()
     | Ok _ -> Assert.Fail("expected a validation error")
 
+// ---- fractional bounds ----
+
+type IntFractionalMinimum2Point5 = Integer<"{\"minimum\": 2.5}">
+
+[<Test>]
+let ``integer fractional minimum: value above fractional minimum succeeds`` () =
+    match IntFractionalMinimum2Point5.create(3) with
+    | Ok v -> Assert.That(v, Is.EqualTo(3))
+    | Error errs -> Assert.Fail(String.concat "; " errs)
+
+[<Test>]
+let ``integer fractional minimum: value below fractional minimum fails`` () =
+    match IntFractionalMinimum2Point5.create(2) with
+    | Error _ -> Assert.Pass()
+    | Ok _ -> Assert.Fail("expected a validation error")
+
+type IntFractionalMaximum9Point5 = Integer<"{\"maximum\": 9.5}">
+
+[<Test>]
+let ``integer fractional maximum: value below fractional maximum succeeds`` () =
+    match IntFractionalMaximum9Point5.create(9) with
+    | Ok v -> Assert.That(v, Is.EqualTo(9))
+    | Error errs -> Assert.Fail(String.concat "; " errs)
+
+[<Test>]
+let ``integer fractional maximum: value above fractional maximum fails`` () =
+    match IntFractionalMaximum9Point5.create(10) with
+    | Error _ -> Assert.Pass()
+    | Ok _ -> Assert.Fail("expected a validation error")
+
+type IntFractionalMultipleOf2Point5 = Integer<"{\"multipleOf\": 2.5}">
+
+[<Test>]
+let ``integer fractional multipleOf: exact multiple succeeds`` () =
+    match IntFractionalMultipleOf2Point5.create(5) with
+    | Ok v -> Assert.That(v, Is.EqualTo(5))
+    | Error errs -> Assert.Fail(String.concat "; " errs)
+
+[<Test>]
+let ``integer fractional multipleOf: non-multiple fails`` () =
+    match IntFractionalMultipleOf2Point5.create(4) with
+    | Error _ -> Assert.Pass()
+    | Ok _ -> Assert.Fail("expected a validation error")
+
 // ---- no constraints ----
 
 type IntNoConstraints = Integer<"{}">

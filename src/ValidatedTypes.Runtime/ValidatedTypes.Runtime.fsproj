@@ -18,9 +18,25 @@
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.7.2" />
-    <PackageReference Include="JsonSchemaProvider" Version="0.1.2" />
-    <ProjectReference Include="..\ValidatedTypes.DesignTime\ValidatedTypes.DesignTime.fsproj">
+    <PackageReference Update="FSharp.Core" Version="10.0.102" />
+    <!-- PrivateAssets=all so this doesn't propagate transitively into consumers of
+         ValidatedTypes.Runtime (e.g. ValidatedTypes.Tests, or JsonSchemaProvider.Runtime) -
+         it's only used internally by Number.fs/Integer.fs/etc. to parse their own validation
+         JSON, not part of this project's public surface. Without this, any consumer needs to
+         host both this (FSharp.Core 8.0.0.0) and our own ValidatedTypes.DesignTime (10.0.102)
+         type providers together, which fails - confirmed by testing. -->
+    <PackageReference Include="JsonSchemaProvider" Version="0.1.2">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <!-- Condition matches JsonSchemaProvider.Runtime's own convention for this exact
+         self-reference-for-packaging pattern. Without it, every local build eagerly hosts BOTH
+         type providers this project touches (the published JsonSchemaProvider 0.1.2, whose
+         frozen design-time host references FSharp.Core 8.0.0.0, and this project's own
+         ValidatedTypes.DesignTime, now on 10.0.102) in the same isolated type-provider context -
+         confirmed by testing to fail with FS3048 "could not load file or assembly FSharp.Core".
+         Number.fs/Integer.fs/etc. never apply ValidatedTypes.Provided.* themselves, so this
+         reference is only needed when actually packing for NuGet. -->
+    <ProjectReference Condition="$(IsNuGet) != ''" Include="..\ValidatedTypes.DesignTime\ValidatedTypes.DesignTime.fsproj">
       <IsFSharpDesignTimeProvider>true</IsFSharpDesignTimeProvider>
       <PrivateAssets>all</PrivateAssets>
     </ProjectReference>

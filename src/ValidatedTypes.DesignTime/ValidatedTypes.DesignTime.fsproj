@@ -5,6 +5,11 @@
     <DefineConstants>IS_DESIGNTIME</DefineConstants>
     <!-- This allows the component to execute from 'bin' directory during build -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!-- Mirrors JsonSchemaProvider.DesignTime's own convention: co-locates this DLL with
+         ValidatedTypes.Runtime's output (where its TypeProviderAssembly attribute looks for it)
+         without needing Runtime's self-reference to be unconditional - see the Condition on that
+         ProjectReference in ValidatedTypes.Runtime.fsproj for why it needs to stay conditional. -->
+    <BaseOutputPath Condition="$(IsNuGet) == ''">..\ValidatedTypes.Runtime\bin</BaseOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\paket-files\fsprojects\FSharp.TypeProviders.SDK\src\ProvidedTypes.fsi">
@@ -32,11 +37,19 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     -->
-    <PackageReference Update="FSharp.Core" Version="4.7.2">
-      <!-- This excludes FSharp.Core.xml and FSharp.Core.resources.dll while referencing the right FSharp.Core.dll version -->
-      <ExcludeAssets>runtime;contentFiles</ExcludeAssets>
+    <!-- No ExcludeAssets here (unlike JsonSchemaProvider.DesignTime's copy of this override):
+         CopyLocalLockFileAssemblies above exists specifically so this assembly is self-contained
+         in its own bin folder, since ValidatedTypes.Runtime.fsproj loads it as an isolated
+         type-provider host - which requires FSharp.Core.dll itself to be physically present
+         there, not excluded. Confirmed by testing: excluding it produces FS3048 "could not load
+         file or assembly FSharp.Core...". -->
+    <PackageReference Update="FSharp.Core" Version="10.0.102" />
+    <!-- PrivateAssets=all: same reasoning as ValidatedTypes.Runtime.fsproj's copy of this
+         reference - stops it propagating into whoever references this project directly
+         (e.g. JsonSchemaProvider.DesignTime). -->
+    <PackageReference Include="JsonSchemaProvider" Version="0.1.2">
+      <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="JsonSchemaProvider" Version="0.1.2" />
     <!-- JsonSchemaProvider 0.1.2's isolated type-provider design-time host
          (typeproviders/fsharp41) was built against older versions of these
          transitive dependencies than its nuspec declares. Without pinning
