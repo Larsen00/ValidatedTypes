@@ -57,8 +57,9 @@ module internal Helpers =
                 t
 
 [<TypeProvider>]
-type BasicErasingProvider (config : TypeProviderConfig) as this =
-    inherit TypeProviderForNamespaces (config, addDefaultProbingLocation=true)
+type ValidatedTypesProvider (config : TypeProviderConfig) as this =
+
+    inherit TypeProviderForNamespaces (config, assemblyReplacementMap = [ ("ValidatedTypes.DesignTime", "ValidatedTypes.Runtime") ], addDefaultProbingLocation=true)
 
     let namespaceName  = "ValidatedTypes.Provided"
     let thisAssembly  = Assembly.GetExecutingAssembly()
