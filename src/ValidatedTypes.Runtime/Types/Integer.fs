@@ -6,6 +6,7 @@ open FsToolkit.ErrorHandling
 module Integer =
 
     // Use a JSON schema to define the structure of the input for integer validations
+    // #region validation-input-schema
     [<Literal>]
     let integerValidationInputSchema =
         """
@@ -21,9 +22,13 @@ module Integer =
         }
         """
 
+    // #omit-start
 
     // Define a type to represent the validations for a integer
-    type IntegerValidations = JsonSchemaProvider<schema=integerValidationInputSchema>
+    // #omit-end
+    type IntegerValidations =
+        JsonSchemaProvider<schema=integerValidationInputSchema>
+    // #endregion
 
     // Validate minimum
     let minimum (validations: IntegerValidations) (integer: int)  =

@@ -5,7 +5,7 @@ open NUnit.Framework
 
 // ---- minimum ----
 
-type Minimum1 = Number<"{\"minimum\": 1}">
+type Minimum1 = Number<"""{"minimum": 1}""">
 
 [<Test>]
 let ``minimum: value above minimum succeeds`` () =
@@ -27,7 +27,7 @@ let ``minimum: value below minimum fails`` () =
 
 // ---- maximum ----
 
-type Maximum10 = Number<"{\"maximum\": 10}">
+type Maximum10 = Number<"""{"maximum": 10}""">
 
 [<Test>]
 let ``maximum: value below maximum succeeds`` () =
@@ -49,7 +49,7 @@ let ``maximum: value above maximum fails`` () =
 
 // ---- exclusiveMinimum ----
 
-type ExclusiveMinimum1 = Number<"{\"exclusiveMinimum\": 1}">
+type ExclusiveMinimum1 = Number<"""{"exclusiveMinimum": 1}""">
 
 [<Test>]
 let ``exclusiveMinimum: value above minimum succeeds`` () =
@@ -71,7 +71,7 @@ let ``exclusiveMinimum: value below minimum fails`` () =
 
 // ---- exclusiveMaximum ----
 
-type ExclusiveMaximum10 = Number<"{\"exclusiveMaximum\": 10}">
+type ExclusiveMaximum10 = Number<"""{"exclusiveMaximum": 10}""">
 
 [<Test>]
 let ``exclusiveMaximum: value below maximum succeeds`` () =
@@ -93,7 +93,7 @@ let ``exclusiveMaximum: value above maximum fails`` () =
 
 // ---- multipleOf ----
 
-type MultipleOf3 = Number<"{\"multipleOf\": 3}">
+type MultipleOf3 = Number<"""{"multipleOf": 3}""">
 
 [<Test>]
 let ``multipleOf: exact multiple succeeds`` () =
@@ -115,7 +115,18 @@ let ``multipleOf: non-multiple fails`` () =
 
 // ---- combined constraints ----
 
-type Range1To10 = Number<"{\"minimum\": 1, \"maximum\": 10}">
+// #region validatedtypes-usage
+type Range1To10 = Number<"""{"minimum": 1, "maximum": 10}""">
+
+let message =
+    match Range1To10.create(5.0) with
+    | Ok value -> sprintf "Valid: %g" value
+    | Error errors -> sprintf "Invalid: %A" errors
+// #endregion
+
+[<Test>]
+let ``usage example: valid value gives Valid message`` () =
+    Assert.That(message, Is.EqualTo("Valid: 5"))
 
 [<Test>]
 let ``range: value inside bounds succeeds`` () =
@@ -137,7 +148,7 @@ let ``range: value above upper bound fails`` () =
 
 // ---- no constraints ----
 
-type NoConstraints = Number<"{}">
+type NoConstraints = Number<"""{}""">
 
 [<Test>]
 let ``no constraints: any value succeeds`` () =

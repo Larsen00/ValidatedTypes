@@ -30,14 +30,18 @@ module internal Helpers =
 
             match parser constrains with
             | Error errors ->
+                // #omit-start
                 // Qualified as System.String: ValidatedTypes.DesignTime.String (our own module,
                 // opened above) shadows the BCL/FSharp.Core String module here.
+                // #omit-end
                 let errorMessages : string = System.String.Join("; ", errors)
                 raise (ArgumentException errorMessages)
 
             | Ok _ ->
+                // #omit-start
                 // The Ok case above is only a design-time validation gate - it
                 // catches malformed constraint JSON as a compile-time error.
+                // #omit-end
                 let t = ProvidedTypeDefinition(thisAssembly, namespaceName, typeName, Some typeof<obj>)
 
                 let tryCreate =
@@ -103,9 +107,12 @@ type ValidatedTypesProvider (config : TypeProviderConfig) as this =
         // Define the static parameters for the "Number" type
         // "Json" is intentionally required (no default value): if it were optional, an
         // explicit argument that happens to equal the default (e.g. "{}") would collide
-        // with the ProvidedTypes SDK's "all static params match their defaults" case,
-        // which skips DefineStaticParameters' callback and returns the plain, member-less
-        // base type instead - see the SDK's own warning about all-optional static params.
+        // with the "all static params match their defaults" case: the compiler drops
+        // default-valued args from the applied type's mangled name, so the applied type
+        // gets the same name as this bare definition and the user ends up with the
+        // member-less definition (the callback still runs). See
+        // https://github.com/fsprojects/FSharp.TypeProviders.SDK/issues/346 and
+        // ComputeMangledNameWithoutDefaultArgValues in the compiler's PrettyNaming.fs.
         NumberType.DefineStaticParameters(
             [
                 ProvidedStaticParameter("Json", typeof<string>)
