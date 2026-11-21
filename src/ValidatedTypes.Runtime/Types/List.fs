@@ -24,14 +24,14 @@ module List =
     type ListValidations = JsonSchemaProvider<schema=listValidationInputSchema>
 
     // Validate minItems
-    let minItems (validations: ListValidations) (list: list<'T>) =
+    let checkMinItems (validations: ListValidations) (list: list<'T>) =
         match validations.minItems with
         | None -> Ok list
         | Some min when List.length list >= min -> Ok list
         | Some min -> Error (sprintf "List has %d items, which is less than the minimum allowed %d" (List.length list) min)
 
     // Validate maxItems
-    let maxItems (validations: ListValidations) (list: list<'T>) =
+    let checkMaxItems (validations: ListValidations) (list: list<'T>) =
         match validations.maxItems with
         | None -> Ok list
         | Some max when List.length list <= max -> Ok list
@@ -62,7 +62,7 @@ module List =
 
             // Collect all validation errors
             let errors =
-                [minItems; maxItems; uniqueItems]
+                [checkMinItems; checkMaxItems; uniqueItems]
                 |> List.choose (fun validation ->
                     match validation validations list with
                     | Ok _ -> None
